@@ -1,0 +1,288 @@
+Eset Task1 solution
+
+Test approach:
+An execution of a regression test suite based on an application specification to confirm that the application works as expected.
+Because of a time limitation the tests are defined according a basic users scenarios to cover up a critical functionality.
+Since later it can be automated easily I leverage Gherkin syntax and a set of special keywords to give structure and meaning to executable specifications. 
+I chose Windows 10 Home edition as testing environment running on my personal laptop due to current availability and the time limitation. 
+A clean installation of the operating system was executed 22.4.2020 so there are enough operating system logs to be collected. 
+Machine does not have an ESET security product installed so only Windows event logs and running processes dumps can be collected.
+
+Test enviroment: Windows 10 Home edition v1909 (18363.1198)
+Application: SET Log Collector Application v2.0.6.0. (ENU language location)
+
+Scenario: Run an application with elevated user rights (as an administrator)
+  Given Windows 10 Home v1909 (18363.1198) run enviroment
+  And machine does not have an ESET security product installed
+  When user runs the logcollector.exe file as an administrator
+  Then the application is open
+  When user clicks on the Close button
+  Then the application is closed without errors
+
+Scenario: Run an application in safe mode (not clear from an assignment whether the app does not start at all or a collecting process is interrupted)
+  Given Windows 10 Home v1909 (18363.1198) run enviroment
+  And machine does not have an ESET security product installed
+  When user runs the logcollector.exe file in safe mode (without administrators rights)
+  Then the application is not open ???
+
+Scenario: Check a default app setting
+  Given Windows 10 Home v1909 (18363.1198) run enviroment
+  And machine does not have an ESET security product installed
+  When user runs the logcollector.exe file as administrator
+  Then the application is open
+  When user checks a default app setting 
+  Then all available artifacts <artifacts> are selected by default
+  And the logs age limit is 30 days
+  And the logs collection mode is Filtered binary
+  And the archive file name and location is already predefined
+  
+  Test data:
+
+  | artifacts                                        | 
+  | Running processes (open handles and loaded DLLs) |  
+  | Application event log                            |
+  | System event log                                 |
+  | SetupAPI logs                                    |
+  | System configuration                             |
+  | Network configuration                            |
+  | WFP filters                                      |  
+  
+Scenario: Collecting data based on the default app setting
+  Given Windows 10 Home v1909 (18363.1198) run enviroment
+  And machine does not have an ESET security product installed
+  When user runs the logcollector.exe file as administrator
+  Then the application is open
+  When user clicks on Collect button
+  Then a collection process is running  
+  And user can view the operation log window at the bottom to see what operation is currently in progress
+  When the collection is finished
+  Then a success pop-up message is open
+  When user opens a predefined archive's directory
+  Then the archive file has been saved in the predefined location as a .zip file with a predefined name 
+  When user extracts the archive file
+  Then the archive contains the given files <location/file name>
+  When user checks the Windows\Logs\Application.xml file
+  And user checks the Windows\Logs\System.xml file
+  Then log evens are not older than 30 day
+
+  Test data:
+
+  | location/file name                  | 
+  | metadata.txt                        |  
+  | collector_log.txt                   |
+  | Windows\Processes\Processes.txt     |
+  | Windows\Logs\Application.xml        |
+  | Windows\Logs\System.xml             |
+  | Windows\Logs\SetupAPI\setupapi*.log |
+  | Config\network.txt                  |
+  | Config\SysInspector.xml             |
+  | Config\WFPFilters.xml               |
+
+Scenarion: Collecting data when a .zip file with a predefined or custom name already exists
+  
+  Given Windows 10 Home v1909 (18363.1198) run enviroment
+  And machine does not have an ESET security product installed
+  And a .zip file with a predefined or custom name already exists
+  When user runs the logcollector.exe file as administrator
+  Then the application is open
+  When user clicks on Collect button
+  Then a modal dialog pop-up message is open
+  When user clicks on Yes button
+  Then the modal dialog pop-up message is closed
+  And a collection process is running  
+  And user can view the operation log window at the bottom to see what operation is currently in progress
+  When the collection is finished
+  Then a success pop-up message is open
+  When user opens a predefined archive's directory
+  Then the archive file has been saved in the predefined location as a .zip file with a predefined name 
+  When user extracts the archive file
+  Then the archive contains the given files <location/file name>
+  When user checks the Windows\Logs\Application.xml file
+  And user checks the Windows\Logs\System.xml file
+  Then log evens are not older than 30 day
+
+  Test data:
+
+  | location/file name                  | 
+  | metadata.txt                        |  
+  | collector_log.txt                   |
+  | Windows\Processes\Processes.txt     |
+  | Windows\Logs\Application.xml        |
+  | Windows\Logs\System.xml             |
+  | Windows\Logs\SetupAPI\setupapi*.log |
+  | Config\network.txt                  |
+  | Config\SysInspector.xml             |
+  | Config\WFPFilters.xml               |
+
+Scenario: Collecting data based on the custom save location setting
+  Given Windows 10 Home v1909 (18363.1198) run enviroment
+  And machine does not have an ESET security product installed
+  When user runs the logcollector.exe file as administrator
+  Then the application is open
+  When user clicks on Collect button
+  Then a collection process is running  
+  And user can view the operation log window at the bottom to see what operation is currently in progress
+  When the collection is finished
+  Then a success pop-up message is open
+  When user opens a custom archive's directory
+  Then the archive file is saved in the custom location as a .zip file with a custom name 
+  When user extracts the archive file
+  Then the archive contains the given files <location/file name>
+  When user checks the Windows\Logs\Application.xml file
+  And user checks the Windows\Logs\System.xml file
+  Then log evens are not older than 30 day
+
+  Test data:
+
+  | location/file name                  | 
+  | metadata.txt                        |  
+  | collector_log.txt                   |
+  | Windows\Processes\Processes.txt     |
+  | Windows\Logs\Application.xml        |
+  | Windows\Logs\System.xml             |
+  | Windows\Logs\SetupAPI\setupapi*.log |
+  | Config\network.txt                  |
+  | Config\SysInspector.xml             |
+  | Config\WFPFilters.xml               |
+
+Scenario: Collecting data based on the custom artifact setting
+  Given Windows 10 Home v1909 (18363.1198) run enviroment
+  And machine does not have an ESET security product installed
+  When user runs the logcollector.exe file as administrator
+  Then the application is open   
+  When user selects artifacts <artifacts>
+  And user clicks on Collect button
+  Then a collection process is running  
+  And user can view the operation log window at the bottom to see what operation is currently in progress
+  When the collection is finished
+  Then a success pop-up message is open
+  When user opens a predefined archive's directory
+  Then the archive file is saved in the predefined location as a .zip file with a predefined name 
+  When user extracts the archive file
+  Then the archive contains the given files <location/file name>
+
+  Test data:
+
+  | artifacts                                        | 
+  | Running processes (open handles and loaded DLLs) |  
+  | Application event log                            |
+  | System event log                                 |
+  | SetupAPI logs                                    |
+  | System configuration                             |
+  | Network configuration                            |
+  | WFP filters                                      |  
+
+  | location/file name                  | 
+  | metadata.txt                        |  
+  | collector_log.txt                   |
+  | Windows\Processes\Processes.txt     |
+  | Windows\Logs\Application.xml        |
+  | Windows\Logs\System.xml             |
+  | Windows\Logs\SetupAPI\setupapi*.log |
+  | Config\network.txt                  |
+  | Config\SysInspector.xml             |
+  | Config\WFPFilters.xml               |
+
+Scenario: Collecting data based on the custom logs age limit setting
+  Given Windows 10 Home v1909 (18363.1198) run enviroment
+  And machine does not have an ESET security product installed
+  When user runs the logcollector.exe file as administrator
+  Then the application is open
+  When user selects artifacts <artifacts>
+  And user selects the logs age limit <logs age limit>
+  And user clicks on Collect button
+  Then a collection process is running  
+  And user can view the operation log window at the bottom to see what operation is currently in progress
+  When the collection is finished
+  Then a success pop-up message is open
+  When user opens a predefined archive's directory
+  Then the archive file is saved in the predefined location as a .zip file with a predefined name 
+  When user extracts the archive file
+  Then the archive contains the given files <location/file name>  
+  When user checks the Windows\Logs\Application.xml file
+  And user checks the Windows\Logs\System.xml file
+  Then log evens are not older than <logs age limit>
+  
+  | artifacts             |   
+  | Application event log | 
+  | System event log      |
+
+
+  | logs age limit |
+  | 1              |
+  | 5              |
+  | 30             |
+  | 60             |
+
+  | location/file name                  | 
+  | Windows\Logs\Application.xml        |
+  | Windows\Logs\System.xml             |
+
+Scenario: Collecting data based on the custom collection mode
+  Given Windows 10 Home v1909 (18363.1198) run enviroment
+  And machine does not have an ESET security product installed
+  When user runs the logcollector.exe file as administrator
+  Then the application is open
+  When user selects a collection mode option <logs collection mode>
+  And user clicks on Collect button
+  Then a collection process is running  
+  And user can view the operation log window at the bottom to see what operation is currently in progress
+  When the collection is finished
+  Then a success pop-up message is open
+  When user opens a predefined archive's directory
+  Then the archive file has been saved in the predefined location as a .zip file with a predefined name 
+  When user extracts the archive file
+  Then the archive contains the given files <location/file name>
+  When user checks the Windows\Logs\Application.xml file
+  And user checks the Windows\Logs\System.xml file
+  Then log evens are not older than 30 day
+
+  Test data:
+
+  | logs collection mode       | 
+  | Filtered XML               |  
+  | Filtered binary            |
+  | Original binary from disk) |
+
+  | location/file name                  | 
+  | metadata.txt                        |  
+  | collector_log.txt                   |
+  | Windows\Processes\Processes.txt     |
+  | Windows\Logs\Application.xml        |
+  | Windows\Logs\System.xml             |
+  | Windows\Logs\SetupAPI\setupapi*.log |
+  | Config\network.txt                  |
+  | Config\SysInspector.xml             |
+  | Config\WFPFilters.xml               | 
+
+Scenario: Collection intentional inerruption
+  Given Windows 10 Home v1909 (18363.1198) run enviroment
+  And machine does not have an ESET security product installed
+  When user runs the logcollector.exe file in safe mode (without administrators rights)
+  Then the application is open
+  When user clicks on Collect button
+  Then a collection process is running  
+  And user can view the operation log window at the bottom to see what operation is currently in progress
+  When user clicks on Cancel button
+  Then a pop-up dialog message is open
+  When users clicks on Yes button
+  Then the pop-up dialog message is closed
+  And the collection process is stoped
+  When user opens the predefined archive's directory
+  Then the archive file was not saved 
+
+Scenario: An error during collection
+  Given Windows 10 Home v1909 (18363.1198) run enviroment
+  And machine does not have an ESET security product installed
+  When user runs the logcollector.exe file in safe mode (without administrators rights)
+  Then the application is open
+  When user clicks on Collect button
+  Then a collection process is running  
+  And user can view the operation log window at the bottom to see what operation is currently in progress
+  Given the collection is interrupted by an error occurence
+  Then an error pop-up message is open
+  When user clicks on Ok button
+  Then the error pop-up message is closed
+  When user opens the predefined archive's directory
+  Then the archive file was not saved 
+
